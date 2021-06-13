@@ -1,3 +1,5 @@
+#Maximize reward and minimize weight
+
 import csv
 
 txid = []
@@ -8,13 +10,15 @@ parents = []
 count = 0
 flag = 0
 current_weight = 0
+
+
 def delete_from_list(i):
     fees.pop(i)
     weights.pop(i)
     txid.pop(i)
     parents.pop(i)
 
-
+##Read the CSV file and append the data in the lists
 with open('mempool.csv') as f:
     reader = csv.reader(f)
     for row in reader:
@@ -25,41 +29,40 @@ with open('mempool.csv') as f:
             parents.append(row[3])
         count=count+1
 
-# if not fees:
-#     if current_weight < 4000000:
-#         max_index = fees.index(max(fees))
-#         current_weight = current_weight + weights[max_index]
-#         if not parents[max_index]:
-#             for i in parents[max_index].split(';'):
-#                 find_index = txid.index(i)
-#                 current_weight = current_weight + weights[find_index]    
-
-    
-#     current_weight = 0
 
 
 while len(fees)>0:
-
     while True:
-        max_index = fees.index(max(fees))
+        #Finding the transaction with the maximum fees
+        max_index = fees.index(max(fees))      
         current_weight = current_weight + weights[max_index]
+        #Check if the weight is within the limits
         if current_weight > 4000000:
             break
         else:
+            #Checking if the transaction has any parent transaction
             if len(parents[max_index])>0:
                 for i in parents[max_index].split(';'):
-                    find_index = txid.index(i)
-                    current_weight = current_weight + weights[find_index]
-                    if current_weight > 4000000:
-                        flag=1
+                    #Finding all the indices of the transaction who have the same parent transaction
+                    find_index = [k for k,x in enumerate(txid) if x==i]
+                    print(find_index)
+                    for j in find_index:
+                        current_weight = current_weight + weights[j]
+                        if current_weight > 4000000:
+                            flag=1
+                            break
+                    if flag==1:
                         break
+                #Write to the TXT file and delete the record from the list    
                 if flag==0:
-                    for i in parents[max_index].split(';'):
-                        find_index = txid.index(i)
+                    for m in parents[max_index].split(';'):
+                        find_index = [k for k,x in enumerate(txid) if x==m]
                         block_file = open("Block.txt","a")
-                        block_file.write(i + "\n") 
-                        delete_from_list(find_index)
+                        for z in find_index:
+                            block_file.write(txid[z] + "\n") 
+                            delete_from_list(z)
         
+        #Write to CSV file and delete the record from the list - For the maximum value
         block_file = open("Block.txt","a")
         block_file.write(txid[max_index] + "\n")
         delete_from_list(max_index)
@@ -69,35 +72,3 @@ while len(fees)>0:
     flag = 0
     block_file = open("Block.txt","a")
     block_file.write("##### NEXT BLOCK #####\n")
-
-            
-
-# findindex = txid.index("5c05321ac828925a32432290c7399eef4af2e153a480ed8fdfc761862f28a6eb")
-# print(findindex)
-# print(parents[findindex])
-# print(txid[max_index])
-# print(fees[max_index])
-# print(weights[max_index])
-# print(parents[max_index])
-
-# fees.pop(max_index)
-# print(txid[1])
-# print(fees[1])
-# print(weights[1])
-# print(parents[1])
-# print("Find index")
-
-# print(txid[1])
-# print(fees[1])
-# print(weights[1])
-
-
-# for i in parents[1].split(';'):
-#     print(i)
-
-# max_index = fees.index(max(fees))
-
-# print(txid[max_index])
-# print(fees[max_index])
-# print(weights[max_index])
-# print(parents[max_index])
